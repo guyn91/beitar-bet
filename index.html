@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>הימורי בית״ר</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AF%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=Heebo:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  :root {
+    --bg: #faf6ec;
+    --surface: #ffffff;
+    --surface-2: #f1e9d3;
+    --border: #e2d5ae;
+    --text: #221c10;
+    --text-dim: #6b5f45;
+    --gold: #b8860b;
+    --gold-deep: #8f6a08;
+    --gold-ink: #ffffff;
+    --teal: #1c7f76;
+    --teal-ink: #ffffff;
+    --danger: #a83c2e;
+    --shadow: 0 1px 2px rgba(30, 22, 5, 0.06), 0 8px 24px -12px rgba(30, 22, 5, 0.18);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12100a;
+      --surface: #1c1710;
+      --surface-2: #262015;
+      --border: #3a3020;
+      --text: #f5efe0;
+      --text-dim: #a99d85;
+      --gold: #f5c518;
+      --gold-deep: #d9ab12;
+      --gold-ink: #1c1710;
+      --teal: #4fb0a8;
+      --teal-ink: #0d201e;
+      --danger: #e0776a;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12100a;
+    --surface: #1c1710;
+    --surface-2: #262015;
+    --border: #3a3020;
+    --text: #f5efe0;
+    --text-dim: #a99d85;
+    --gold: #f5c518;
+    --gold-deep: #d9ab12;
+    --gold-ink: #1c1710;
+    --teal: #4fb0a8;
+    --teal-ink: #0d201e;
+    --danger: #e0776a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Heebo", "Segoe UI", Tahoma, Arial, sans-serif;
+    direction: rtl;
+    text-align: right;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  h1, h2, h3 { font-family: "Rubik", "Heebo", sans-serif; text-wrap: balance; margin: 0; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  button { font-family: inherit; }
+  input, select { font-family: inherit; }
+  a { color: var(--gold-deep); }
+
+  #app { max-width: 920px; margin: 0 auto; padding: 0 16px 64px; }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 22px 4px 16px;
+  }
+  .crest {
+    flex: none; width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(155deg, var(--gold) 0%, var(--gold-deep) 100%);
+    color: var(--gold-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Rubik", sans-serif; font-weight: 900; font-size: 18px;
+    box-shadow: var(--shadow);
+  }
+  .topbar-titles { flex: 1; min-width: 0; }
+  .topbar-titles h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+  .topbar-titles p { margin: 2px 0 0; font-size: 12.5px; color: var(--text-dim); }
+  .theme-note { font-size: 11px; color: var(--text-dim); }
+
+  nav.tabs {
+    display: flex; gap: 4px; overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+    margin-bottom: 22px;
+  }
+  nav.tabs button {
+    appearance: none; border: none; background: transparent; cursor: pointer;
+    color: var(--text-dim); font-size: 14px; font-weight: 600;
+    padding: 10px 14px 12px; border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  nav.tabs button.active { color: var(--text); border-bottom-color: var(--gold); }
+  nav.tabs button:hover:not(.active) { color: var(--text); }
+
+  /* ---- Cards ---- */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 20px; margin-bottom: 18px;
+  }
+  .card > h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .card .card-sub { font-size: 12.5px; color: var(--text-dim); margin: 0 0 16px; }
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase; color: var(--gold-deep);
+    margin-bottom: 6px; display: block;
+  }
+  .banner {
+    border-radius: var(--radius); padding: 12px 16px; font-size: 13px;
+    margin-bottom: 18px; border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--text-dim);
+  }
+  .banner.warn { border-color: var(--danger); color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }
+  .empty-state { text-align: center; padding: 36px 16px; color: var(--text-dim); font-size: 13.5px; }
+
+  /* ---- Matchday hero ---- */
+  .matchday {
+    background: radial-gradient(120% 140% at 20% -10%, color-mix(in srgb, var(--gold) 18%, var(--surface)) 0%, var(--surface) 55%);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 22px; margin-bottom: 18px; position: relative; overflow: hidden;
+  }
+  .matchday::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .matchday-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .matchday-head .comp { font-size: 12px; font-weight: 700; color: var(--gold-deep); text-transform: uppercase; letter-spacing: 0.04em; font-family: "JetBrains Mono", monospace; }
+  .matchday-head .when { font-size: 12.5px; color: var(--text-dim); }
+  .versus { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 6px 0 20px; }
+  .team { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 132px; }
+  .badge { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: "Rubik", sans-serif; font-weight: 800; font-size: 17px; }
+  .badge.beitar { background: linear-gradient(155deg, var(--gold), var(--gold-deep)); color: var(--gold-ink); }
+  .badge.rival { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+  .team-name { font-size: 13px; font-weight: 700; text-align: center; }
+  .team-venue { font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; font-family: "JetBrains Mono", monospace; }
+  .vs-mark { font-family: "Rubik", sans-serif; font-weight: 900; font-size: 15px; color: var(--text-dim); }
+
+  .countdown { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+  .countdown .unit { text-align: center; min-width: 54px; }
+  .countdown .num { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 22px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 6px 4px; display: block; }
+  .countdown .lbl { font-size: 9.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; display: block; }
+
+  .predict-form { display: flex; flex-direction: column; gap: 14px; }
+  .score-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .score-side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .score-side label { font-size: 11px; color: var(--text-dim); font-weight: 600; }
+  .score-input {
+    width: 64px; height: 60px; text-align: center; font-family: "JetBrains Mono", monospace;
+    font-size: 26px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--border);
+    background: var(--surface-2); color: var(--text);
+  }
+  .score-input:focus { outline: none; border-color: var(--gold); }
+  .score-dash { font-family: "Rubik", sans-serif; font-weight: 800; font-size: 22px; color: var(--text-dim); margin-top: 18px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+  select, input[type="text"], input[type="datetime-local"], input[type="password"], input[type="number"].plain {
+    border: 1.5px solid var(--border); background: var(--surface-2); color: var(--text);
+    border-radius: 10px; padding: 10px 12px; font-size: 14px;
+  }
+  select:focus, input:focus { outline: none; border-color: var(--gold); }
+
+  .btn {
+    appearance: none; border: none; cursor: pointer; border-radius: 10px;
+    font-weight: 700; font-size: 13.5px; padding: 12px 18px;
+    background: linear-gradient(155deg, var(--gold), var(--gold-deep)); color: var(--gold-ink);
+    box-shadow: var(--shadow);
+  }
+  .btn:hover { filter: brightness(1.04); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+  .btn.secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+  .btn.danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); box-shadow: none; }
+  .btn.small { padding: 7px 12px; font-size: 12px; }
+  .btn.block { width: 100%; }
+
+  .roster { display: flex; flex-wrap: wrap; gap: 8px; }
+  .roster .chip {
+    display: flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 6px 11px;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim);
+  }
+  .roster .chip.done { color: var(--text); border-color: var(--gold); }
+  .roster .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+  .roster .chip.done .dot { background: var(--gold); }
+
+  /* ---- Leaderboard ---- */
+  .board-summary { display: flex; gap: 22px; margin-bottom: 18px; flex-wrap: wrap; }
+  .stat { min-width: 90px; }
+  .stat .n { font-family: "JetBrains Mono", monospace; font-size: 22px; font-weight: 700; display: block; }
+  .stat .l { font-size: 11px; color: var(--text-dim); }
+  table { width: 100%; border-collapse: collapse; }
+  .table-wrap { overflow-x: auto; }
+  th, td { padding: 11px 10px; text-align: center; font-size: 13.5px; border-bottom: 1px solid var(--border); }
+  th { font-family: "JetBrains Mono", monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); font-weight: 600; }
+  td.name-cell { text-align: right; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  tr.me { background: color-mix(in srgb, var(--gold) 8%, transparent); }
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+    border-radius: 50%; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 12px;
+    background: var(--surface-2); color: var(--text-dim);
+  }
+  .rank-badge.r1 { background: linear-gradient(155deg, #f5d24a, #c99a10); color: #2b2004; }
+  .rank-badge.r2 { background: linear-gradient(155deg, #dfe2e6, #a7adb5); color: #24272b; }
+  .rank-badge.r3 { background: linear-gradient(155deg, #e2a26b, #a8672f); color: #2c1804; }
+  .pt-num { font-family: "JetBrains Mono", monospace; font-weight: 700; }
+  .pt-total { font-size: 15px; }
+
+  /* ---- Matches list ---- */
+  .match-row { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; background: var(--surface); }
+  .match-row-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .match-title { font-weight: 700; font-size: 14px; }
+  .match-meta { font-size: 11.5px; color: var(--text-dim); font-family: "JetBrains Mono", monospace; }
+  .match-score { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 20px; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pill.bul { background: color-mix(in srgb, var(--gold) 22%, var(--surface)); color: var(--gold-deep); }
+  .pill.kivun { background: color-mix(in srgb, var(--teal) 20%, var(--surface)); color: var(--teal); }
+  .pill.miss { background: var(--surface-2); color: var(--text-dim); }
+  .reveal-grid { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .reveal-item { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; gap: 6px; }
+  .reveal-item .who { color: var(--text-dim); }
+  .reveal-item .what { font-family: "JetBrains Mono", monospace; font-weight: 600; }
+  details.reveal-toggle summary { cursor: pointer; font-size: 12px; color: var(--gold-deep); font-weight: 600; margin-top: 10px; list-style: none; }
+  details.reveal-toggle summary::-webkit-details-marker { display: none; }
+
+  /* ---- Admin ---- */
+  .admin-grid { display: flex; flex-direction: column; gap: 10px; }
+  .admin-match-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .admin-match-row .info { flex: 1; min-width: 160px; }
+  .admin-match-row .name { font-weight: 700; font-size: 13.5px; }
+  .admin-match-row .meta { font-size: 11px; color: var(--text-dim); font-family: "JetBrains Mono", monospace; }
+  .result-form { display: flex; align-items: center; gap: 6px; }
+  .result-form input { width: 44px; height: 38px; text-align: center; }
+  .lock-note { font-size: 11.5px; color: var(--text-dim); margin-top: 10px; }
+
+  footer.credit { text-align: center; font-size: 11px; color: var(--text-dim); padding: 20px 0 6px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
+  const FIREBASE_CONFIGURED = firebaseConfig.apiKey !== "YOUR_API_KEY";
+
+  const PARTICIPANTS = ["בן עברי","אייל כהן","גיא נעמתי","ניב סליימן","שלומי מזרחי","אופק אברס","שי וקנין","עילאי בוחבוט","אילן נשר","רוני מינקין","אורי גליל"];
+  const DEFAULT_ADMIN_PIN = "1936";
+
+  function defaultState() {
+    return { matches: [], predictions: [], adminPin: DEFAULT_ADMIN_PIN };
+  }
+
+  let STATE = null;
+  let CAN_WRITE = true;
+  let db = null;
+  let stateRef = null;
+  let fsApi = null;
+
+  let activeTab = sessionStorage.getItem("beitar_tab") || "predict";
+  let meName = localStorage.getItem("beitar_me") || "";
+  let adminUnlocked = localStorage.getItem("beitar_admin_ok") === "1";
+  let countdownTimer = null;
+  let adminError = "";
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function outcome(a, b) {
+    if (a > b) return "W";
+    if (a < b) return "L";
+    return "D";
+  }
+
+  function pointsFor(pred, result) {
+    if (!result) return 0;
+    if (pred.beitar === result.beitar && pred.opponent === result.opponent) return 3;
+    if (outcome(pred.beitar, pred.opponent) === outcome(result.beitar, result.opponent)) return 1;
+    return 0;
+  }
+
+  function findPrediction(matchId, participant) {
+    for (var i = 0; i < STATE.predictions.length; i++) {
+      var p = STATE.predictions[i];
+      if (p.matchId === matchId && p.participant === participant) return p;
+    }
+    return null;
+  }
+
+  function sortedMatches() {
+    return STATE.matches.slice().sort(function (a, b) {
+      return new Date(a.kickoff) - new Date(b.kickoff);
+    });
+  }
+
+  function nextOpenMatch() {
+    var upcoming = sortedMatches().filter(function (m) { return !m.result; });
+    if (!upcoming.length) return null;
+    return upcoming[0];
+  }
+
+  function isLocked(match) {
+    return new Date(match.kickoff) <= new Date();
+  }
+
+  function fmtDateTime(iso) {
+    var d = new Date(iso);
+    var datePart = d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+    var timePart = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+    return datePart + " · " + timePart;
+  }
+
+  function initials(name) {
+    var parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2);
+    return parts[0][0] + parts[parts.length - 1][0];
+  }
+
+  function computeStandings() {
+    var byName = {};
+    PARTICIPANTS.forEach(function (name) {
+      byName[name] = { name: name, total: 0, bul: 0, kivun: 0 };
+    });
+    STATE.matches.forEach(function (m) {
+      if (!m.result) return;
+      PARTICIPANTS.forEach(function (name) {
+        var pred = findPrediction(m.id, name);
+        if (!pred) return;
+        var pts = pointsFor(pred, m.result);
+        if (pts === 3) { byName[name].total += 3; byName[name].bul += 1; }
+        else if (pts === 1) { byName[name].total += 1; byName[name].kivun += 1; }
+      });
+    });
+    var arr = Object.keys(byName).map(function (k) { return byName[k]; });
+    arr.sort(function (a, b) {
+      if (b.total !== a.total) return b.total - a.total;
+      if (b.bul !== a.bul) return b.bul - a.bul;
+      return a.name.localeCompare(b.name, "he");
+    });
+    return arr;
+  }
+
+  /* ---------------- rendering ---------------- */
+
+  function render() {
+    var app = document.getElementById("app");
+    var html = "";
+    html += renderTopbar();
+    if (!STATE) {
+      html += '<div class="card"><div class="empty-state">טוען נתונים…</div></div>';
+      app.innerHTML = html;
+      return;
+    }
+    html += renderTabs();
+    if (activeTab === "predict") html += renderPredictTab();
+    else if (activeTab === "board") html += renderBoardTab();
+    else if (activeTab === "matches") html += renderMatchesTab();
+    else if (activeTab === "admin") html += renderAdminTab();
+    html += '<footer class="credit">פינת ההימורים של פודקאסט אוהדי בית״ר ירושלים · פגיעה בול = 3 נק׳ · פגיעה בכיוון = 1 נק׳</footer>';
+    app.innerHTML = html;
+    bindEvents();
+    if (activeTab === "predict") startCountdown();
+    else stopCountdown();
+  }
+
+  function renderTopbar() {
+    var notice = "";
+    if (!FIREBASE_CONFIGURED) {
+      notice = '<div class="banner warn">האתר עדיין לא מחובר ל-Firebase — יש להשלים את ההגדרה בקובץ (firebaseConfig) לפני שאפשר יהיה לשמור הימורים.</div>';
+    } else if (!CAN_WRITE) {
+      notice = '<div class="banner warn">לא ניתן לשמור שינויים כרגע (בעיית חיבור). נסו לרענן את הדף.</div>';
+    }
+    return (
+      '<div class="topbar">' +
+        '<div class="crest">ב״י</div>' +
+        '<div class="topbar-titles">' +
+          '<h1>הימורי בית״ר ירושלים</h1>' +
+          '<p>פינת ההימורים של הפודקאסט — נחשו, צברו נקודות, תפסו את הראש</p>' +
+        "</div>" +
+      "</div>" +
+      notice
+    );
+  }
+
+  function renderTabs() {
+    var tabs = [
+      ["predict", "הימור"],
+      ["board", "טבלת דירוג"],
+      ["matches", "משחקים ותוצאות"],
+      ["admin", "ניהול"]
+    ];
+    var html = '<nav class="tabs">';
+    tabs.forEach(function (t) {
+      html += '<button data-tab="' + t[0] + '" class="' + (activeTab === t[0] ? "active" : "") + '">' + t[1] + "</button>";
+    });
+    html += "</nav>";
+    return html;
+  }
+
+  function renderPredictTab() {
+    var html = "";
+    var match = nextOpenMatch();
+
+    if (!match) {
+      html += '<div class="card"><div class="empty-state">אין כרגע משחק פתוח להימורים.<br>ברגע שיתעדכן משחק קרוב של בית״ר, אפשר יהיה להמר כאן.</div></div>';
+      return html;
+    }
+
+    var locked = isLocked(match);
+    var homeTeam = match.venue === "home" ? "בית״ר" : match.opponent;
+    var awayTeam = match.venue === "home" ? match.opponent : "בית״ר";
+
+    html += '<div class="matchday">';
+    html += '<div class="matchday-head"><span class="comp">' + esc(match.competition || "משחק בית״ר") + '</span><span class="when">' + fmtDateTime(match.kickoff) + "</span></div>";
+    html += '<div class="versus">';
+    html += '<div class="team"><div class="badge beitar">ב״י</div><div class="team-name">בית״ר ירושלים</div><div class="team-venue">' + (match.venue === "home" ? "מארחת" : "אורחת") + "</div></div>";
+    html += '<div class="vs-mark">—</div>';
+    html += '<div class="team"><div class="badge rival">' + esc(initials(match.opponent)) + '</div><div class="team-name">' + esc(match.opponent) + '</div><div class="team-venue">' + (match.venue === "home" ? "אורחת" : "מארחת") + "</div></div>";
+    html += "</div>";
+
+    if (!locked) {
+      html += '<div class="countdown" id="countdown-box" data-kickoff="' + esc(match.kickoff) + '">' + countdownUnits(match.kickoff) + "</div>";
+    } else {
+      html += '<div class="banner warn" style="margin-top:0">ההימורים למשחק הזה ננעלו — המשחק כבר יצא לדרך. מחכים לתוצאה הסופית.</div>';
+    }
+
+    if (!locked) {
+      html += '<form id="predict-form" class="predict-form">';
+      html += '<div class="field"><label>מי אתה?</label><select id="who-select" ' + (CAN_WRITE ? "" : "disabled") + ">";
+      html += '<option value="">בחר שם…</option>';
+      PARTICIPANTS.forEach(function (name) {
+        html += '<option value="' + esc(name) + '" ' + (name === meName ? "selected" : "") + ">" + esc(name) + "</option>";
+      });
+      html += "</select></div>";
+
+      var existing = meName ? findPrediction(match.id, meName) : null;
+      var homeVal = existing ? (match.venue === "home" ? existing.beitar : existing.opponent) : "";
+      var awayVal = existing ? (match.venue === "home" ? existing.opponent : existing.beitar) : "";
+
+      html += '<div class="score-row">';
+      html += '<div class="score-side"><label>' + esc(homeTeam) + "</label><input class=\"score-input\" type=\"number\" min=\"0\" max=\"20\" id=\"score-home\" value=\"" + homeVal + "\" " + (CAN_WRITE ? "" : "disabled") + " /></div>";
+      html += '<div class="score-dash">:</div>';
+      html += '<div class="score-side"><label>' + esc(awayTeam) + "</label><input class=\"score-input\" type=\"number\" min=\"0\" max=\"20\" id=\"score-away\" value=\"" + awayVal + "\" " + (CAN_WRITE ? "" : "disabled") + " /></div>";
+      html += "</div>";
+
+      html += '<button type="submit" class="btn block" ' + (CAN_WRITE ? "" : "disabled") + ">" + (existing ? "עדכון ההימור" : "שליחת הימור") + "</button>";
+      html += "</form>";
+    }
+    html += "</div>";
+
+    html += '<div class="card"><h2>מי כבר הימר</h2><p class="card-sub">ההימורים עצמם יתגלו לכולם רק אחרי נעילת המשחק</p>';
+    html += '<div class="roster">';
+    PARTICIPANTS.forEach(function (name) {
+      var has = !!findPrediction(match.id, name);
+      html += '<div class="chip ' + (has ? "done" : "") + '"><span class="dot"></span>' + esc(name) + "</div>";
+    });
+    html += "</div></div>";
+
+    if (locked) {
+      html += renderRevealCard(match);
+    }
+
+    return html;
+  }
+
+  function countdownUnits(kickoffIso) {
+    var diff = Math.max(0, new Date(kickoffIso) - new Date());
+    var s = Math.floor(diff / 1000);
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60); s -= m * 60;
+    function pad(n) { return String(n).length < 2 ? "0" + n : String(n); }
+    var html = "";
+    if (d > 0) html += '<div class="unit"><span class="num">' + d + '</span><span class="lbl">ימים</span></div>';
+    html += '<div class="unit"><span class="num">' + pad(h) + '</span><span class="lbl">שעות</span></div>';
+    html += '<div class="unit"><span class="num">' + pad(m) + '</span><span class="lbl">דקות</span></div>';
+    html += '<div class="unit"><span class="num">' + pad(s) + '</span><span class="lbl">שניות</span></div>';
+    return html;
+  }
+
+  function startCountdown() {
+    stopCountdown();
+    countdownTimer = setInterval(function () {
+      var box = document.getElementById("countdown-box");
+      if (!box) { stopCountdown(); return; }
+      var kickoff = box.getAttribute("data-kickoff");
+      if (new Date(kickoff) <= new Date()) { render(); return; }
+      box.innerHTML = countdownUnits(kickoff);
+    }, 1000);
+  }
+
+  function stopCountdown() {
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  }
+
+  function renderRevealCard(match) {
+    var html = '<div class="card"><h2>ההימורים שהוגשו</h2>';
+    html += '<p class="card-sub">' + esc(match.opponent) + " · " + fmtDateTime(match.kickoff) + "</p>";
+    html += '<div class="reveal-grid">';
+    PARTICIPANTS.forEach(function (name) {
+      var pred = findPrediction(match.id, name);
+      html += '<div class="reveal-item"><span class="who">' + esc(name) + "</span>";
+      if (!pred) {
+        html += '<span class="what" style="color:var(--text-dim)">לא הימר</span>';
+      } else {
+        var homeVal = match.venue === "home" ? pred.beitar : pred.opponent;
+        var awayVal = match.venue === "home" ? pred.opponent : pred.beitar;
+        html += '<span class="what">' + homeVal + "–" + awayVal + "</span>";
+      }
+      html += "</div>";
+    });
+    html += "</div></div>";
+    return html;
+  }
+
+  function renderBoardTab() {
+    var standings = computeStandings();
+    var decided = STATE.matches.filter(function (m) { return m.result; }).length;
+    var html = '<div class="card">';
+    html += '<div class="board-summary">';
+    html += '<div class="stat"><span class="n mono">' + standings.length + '</span><span class="l">משתתפים</span></div>';
+    html += '<div class="stat"><span class="n mono">' + decided + '</span><span class="l">משחקים הוכרעו</span></div>';
+    html += "</div>";
+
+    if (decided === 0) {
+      html += '<div class="empty-state">עוד לא הוכרע אף משחק — הטבלה תתעדכן אחרי התוצאה הראשונה.</div>';
+    } else {
+      html += '<div class="table-wrap"><table><thead><tr>';
+      html += "<th>#</th><th>שם</th><th>ניקוד</th><th>בול</th><th>כיוון</th>";
+      html += "</tr></thead><tbody>";
+      standings.forEach(function (row, idx) {
+        var rank = idx + 1;
+        var badgeClass = rank === 1 ? "r1" : rank === 2 ? "r2" : rank === 3 ? "r3" : "";
+        html += '<tr class="' + (row.name === meName ? "me" : "") + '">';
+        html += '<td><span class="rank-badge ' + badgeClass + '">' + rank + "</span></td>";
+        html += '<td class="name-cell">' + esc(row.name) + "</td>";
+        html += '<td class="pt-num pt-total">' + row.total + "</td>";
+        html += '<td class="pt-num">' + row.bul + "</td>";
+        html += '<td class="pt-num">' + row.kivun + "</td>";
+        html += "</tr>";
+      });
+      html += "</tbody></table></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function renderMatchesTab() {
+    var html = "";
+    var all = sortedMatches();
+    var upcoming = all.filter(function (m) { return !m.result; });
+    var finished = all.filter(function (m) { return m.result; }).reverse();
+
+    html += '<div class="card"><h2>משחקים קרובים</h2>';
+    if (!upcoming.length) {
+      html += '<p class="card-sub">אין כרגע משחקים מתוכננים במערכת.</p>';
+    } else {
+      upcoming.forEach(function (m) {
+        html += '<div class="match-row"><div class="match-row-top">';
+        html += '<div><div class="match-title">בית״ר ' + (m.venue === "home" ? "נגד" : "אצל") + " " + esc(m.opponent) + "</div>";
+        html += '<div class="match-meta">' + esc(m.competition || "") + " · " + fmtDateTime(m.kickoff) + "</div></div>";
+        html += '<div class="pill ' + (isLocked(m) ? "miss" : "kivun") + '">' + (isLocked(m) ? "ננעל" : "פתוח להימורים") + "</div>";
+        html += "</div></div>";
+      });
+    }
+    html += "</div>";
+
+    html += '<div class="card"><h2>תוצאות אחרונות</h2>';
+    if (!finished.length) {
+      html += '<p class="card-sub">עוד לא הוזנו תוצאות.</p>';
+    } else {
+      finished.forEach(function (m) {
+        var homeVal = m.venue === "home" ? m.result.beitar : m.result.opponent;
+        var awayVal = m.venue === "home" ? m.result.opponent : m.result.beitar;
+        html += '<div class="match-row"><div class="match-row-top">';
+        html += '<div><div class="match-title">בית״ר ' + (m.venue === "home" ? "נגד" : "אצל") + " " + esc(m.opponent) + "</div>";
+        html += '<div class="match-meta">' + esc(m.competition || "") + " · " + fmtDateTime(m.kickoff) + "</div></div>";
+        html += '<div class="match-score">' + homeVal + "–" + awayVal + "</div>";
+        html += "</div>";
+
+        html += '<details class="reveal-toggle"><summary>הצג הימורים ונקודות</summary><div class="reveal-grid">';
+        PARTICIPANTS.forEach(function (name) {
+          var pred = findPrediction(m.id, name);
+          html += '<div class="reveal-item"><span class="who">' + esc(name) + "</span>";
+          if (!pred) {
+            html += '<span class="pill miss">לא הימר</span>';
+          } else {
+            var pts = pointsFor(pred, m.result);
+            var pHome = m.venue === "home" ? pred.beitar : pred.opponent;
+            var pAway = m.venue === "home" ? pred.opponent : pred.beitar;
+            var pillClass = pts === 3 ? "bul" : pts === 1 ? "kivun" : "miss";
+            var pillLabel = pts === 3 ? "בול" : pts === 1 ? "כיוון" : "החטאה";
+            html += '<span class="what">' + pHome + "–" + pAway + '</span> <span class="pill ' + pillClass + '">' + pillLabel + "</span>";
+          }
+          html += "</div>";
+        });
+        html += "</div></details>";
+
+        html += "</div>";
+      });
+    }
+    html += "</div>";
+
+    return html;
+  }
+
+  function renderAdminTab() {
+    var html = "";
+    if (!adminUnlocked) {
+      html += '<div class="card"><h2>כניסת ניהול</h2><p class="card-sub">קוד הניהול נמצא אצל מפעילי הפודקאסט</p>';
+      html += '<form id="pin-form" class="predict-form">';
+      html += '<div class="field"><label>קוד ניהול</label><input type="password" id="pin-input" value="" /></div>';
+      if (adminError) html += '<div class="banner warn">' + esc(adminError) + "</div>";
+      html += '<button type="submit" class="btn block">כניסה</button>';
+      html += "</form></div>";
+      return html;
+    }
+
+    html += '<div class="card"><div class="match-row-top" style="margin-bottom:14px"><h2>הוספת משחק</h2><button class="btn secondary small" id="lock-admin">יציאה</button></div>';
+    html += '<form id="add-match-form" class="admin-grid">';
+    html += '<div class="field"><label>יריבה</label><input type="text" id="new-opponent" placeholder="לדוגמה: מכבי תל אביב" required /></div>';
+    html += '<div class="field"><label>מסגרת</label><input type="text" id="new-competition" placeholder="ליגת העל / גביע המדינה / גביע הטוטו…" list="comp-list" /><datalist id="comp-list">';
+    ["ליגת העל", "גביע המדינה", "גביע הטוטו", "ליגה אירופה", "ליגת הקונפרנס", "משחק ידידות"].forEach(function (c) {
+      html += '<option value="' + c + '">';
+    });
+    html += "</datalist></div>";
+    html += '<div class="field"><label>מקום המשחק</label><select id="new-venue"><option value="home">ביתי</option><option value="away">חוץ</option></select></div>';
+    html += '<div class="field"><label>תאריך ושעה</label><input type="datetime-local" id="new-kickoff" required /></div>';
+    html += '<button type="submit" class="btn block">הוספת משחק</button>';
+    html += "</form></div>";
+
+    var pending = sortedMatches().filter(function (m) { return !m.result; });
+    html += '<div class="card"><h2>משחקים ממתינים לתוצאה</h2>';
+    if (!pending.length) {
+      html += '<p class="card-sub">אין כרגע משחקים פתוחים במערכת.</p>';
+    } else {
+      pending.forEach(function (m) {
+        html += '<div class="admin-match-row" data-match-id="' + m.id + '">';
+        html += '<div class="info"><div class="name">בית״ר ' + (m.venue === "home" ? "נגד" : "אצל") + " " + esc(m.opponent) + "</div>";
+        html += '<div class="meta">' + esc(m.competition || "") + " · " + fmtDateTime(m.kickoff) + "</div></div>";
+        html += '<form class="result-form" data-result-for="' + m.id + '">';
+        html += '<input type="number" min="0" max="20" placeholder="בי״ר" required />';
+        html += "<span>–</span>";
+        html += '<input type="number" min="0" max="20" placeholder="יריבה" required />';
+        html += '<button type="submit" class="btn small">שמירת תוצאה</button>';
+        html += "</form>";
+        html += '<button class="btn danger small" data-delete-match="' + m.id + '">מחיקה</button>';
+        html += "</div>";
+      });
+    }
+    html += "</div>";
+
+    var done = sortedMatches().filter(function (m) { return m.result; }).reverse();
+    if (done.length) {
+      html += '<div class="card"><h2>משחקים שהוזנה להם תוצאה</h2>';
+      done.forEach(function (m) {
+        var homeVal = m.venue === "home" ? m.result.beitar : m.result.opponent;
+        var awayVal = m.venue === "home" ? m.result.opponent : m.result.beitar;
+        html += '<div class="admin-match-row">';
+        html += '<div class="info"><div class="name">בית״ר ' + (m.venue === "home" ? "נגד" : "אצל") + " " + esc(m.opponent) + " — " + homeVal + "–" + awayVal + "</div>";
+        html += '<div class="meta">' + esc(m.competition || "") + " · " + fmtDateTime(m.kickoff) + "</div></div>";
+        html += '<button class="btn secondary small" data-reopen-match="' + m.id + '">פתיחה מחדש</button>';
+        html += "</div>";
+      });
+      html += "</div>";
+    }
+
+    html += '<p class="lock-note">קוד הניהול הנוכחי: ' + esc(STATE.adminPin) + " — ניתן לבקש מגיא להחליף אותו.</p>";
+    return html;
+  }
+
+  /* ---------------- events ---------------- */
+
+  function bindEvents() {
+    document.querySelectorAll("nav.tabs button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        activeTab = btn.getAttribute("data-tab");
+        sessionStorage.setItem("beitar_tab", activeTab);
+        render();
+      });
+    });
+
+    var whoSelect = document.getElementById("who-select");
+    if (whoSelect) {
+      whoSelect.addEventListener("change", function () {
+        meName = whoSelect.value;
+        localStorage.setItem("beitar_me", meName);
+        render();
+      });
+    }
+
+    var predictForm = document.getElementById("predict-form");
+    if (predictForm) {
+      predictForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!CAN_WRITE) return;
+        var who = document.getElementById("who-select").value;
+        if (!who) { alert("צריך לבחור שם קודם"); return; }
+        var match = nextOpenMatch();
+        if (!match || isLocked(match)) { render(); return; }
+        var homeInput = parseInt(document.getElementById("score-home").value, 10);
+        var awayInput = parseInt(document.getElementById("score-away").value, 10);
+        if (isNaN(homeInput) || isNaN(awayInput) || homeInput < 0 || awayInput < 0) {
+          alert("צריך למלא תוצאה תקינה לשני הצדדים");
+          return;
+        }
+        var beitarGoals = match.venue === "home" ? homeInput : awayInput;
+        var opponentGoals = match.venue === "home" ? awayInput : homeInput;
+        var matchId = match.id;
+        var ts = new Date().toISOString();
+
+        meName = who;
+        localStorage.setItem("beitar_me", meName);
+
+        mutateState(function (state) {
+          var arr = state.predictions;
+          var existing = null;
+          for (var i = 0; i < arr.length; i++) {
+            if (arr[i].matchId === matchId && arr[i].participant === who) { existing = arr[i]; break; }
+          }
+          if (existing) {
+            existing.beitar = beitarGoals;
+            existing.opponent = opponentGoals;
+            existing.ts = ts;
+          } else {
+            arr.push({ matchId: matchId, participant: who, beitar: beitarGoals, opponent: opponentGoals, ts: ts });
+          }
+        });
+      });
+    }
+
+    var pinForm = document.getElementById("pin-form");
+    if (pinForm) {
+      pinForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var val = document.getElementById("pin-input").value;
+        if (val === STATE.adminPin) {
+          adminUnlocked = true;
+          adminError = "";
+          localStorage.setItem("beitar_admin_ok", "1");
+        } else {
+          adminError = "קוד שגוי, נסו שוב";
+        }
+        render();
+      });
+    }
+
+    var lockAdmin = document.getElementById("lock-admin");
+    if (lockAdmin) {
+      lockAdmin.addEventListener("click", function () {
+        adminUnlocked = false;
+        localStorage.removeItem("beitar_admin_ok");
+        render();
+      });
+    }
+
+    var addMatchForm = document.getElementById("add-match-form");
+    if (addMatchForm) {
+      addMatchForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var opponent = document.getElementById("new-opponent").value.trim();
+        var competition = document.getElementById("new-competition").value.trim();
+        var venue = document.getElementById("new-venue").value;
+        var kickoff = document.getElementById("new-kickoff").value;
+        if (!opponent || !kickoff) return;
+        var id = "m_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        mutateState(function (state) {
+          state.matches.push({ id: id, opponent: opponent, competition: competition, venue: venue, kickoff: kickoff, result: null });
+        });
+      });
+    }
+
+    document.querySelectorAll("form[data-result-for]").forEach(function (form) {
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var matchId = form.getAttribute("data-result-for");
+        var inputs = form.querySelectorAll("input");
+        var homeVal = parseInt(inputs[0].value, 10);
+        var awayVal = parseInt(inputs[1].value, 10);
+        if (isNaN(homeVal) || isNaN(awayVal)) return;
+        var match = STATE.matches.find(function (m) { return m.id === matchId; });
+        if (!match) return;
+        var beitarGoals = match.venue === "home" ? homeVal : awayVal;
+        var opponentGoals = match.venue === "home" ? awayVal : homeVal;
+        mutateState(function (state) {
+          var m = state.matches.find(function (mm) { return mm.id === matchId; });
+          if (m) m.result = { beitar: beitarGoals, opponent: opponentGoals };
+        });
+      });
+    });
+
+    document.querySelectorAll("[data-delete-match]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-delete-match");
+        if (!confirm("למחוק את המשחק הזה? כל ההימורים עליו יימחקו.")) return;
+        mutateState(function (state) {
+          state.matches = state.matches.filter(function (m) { return m.id !== id; });
+          state.predictions = state.predictions.filter(function (p) { return p.matchId !== id; });
+        });
+      });
+    });
+
+    document.querySelectorAll("[data-reopen-match]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-reopen-match");
+        mutateState(function (state) {
+          var m = state.matches.find(function (mm) { return mm.id === id; });
+          if (m) m.result = null;
+        });
+      });
+    });
+  }
+
+  /* ---------------- persistence (Firebase) ---------------- */
+
+  function mutateState(mutator) {
+    if (STATE) {
+      mutator(STATE);
+      render();
+    }
+    if (!stateRef || !fsApi) return;
+    fsApi.runTransaction(db, function (tx) {
+      return tx.get(stateRef).then(function (snap) {
+        var base = snap.exists() ? snap.data() : defaultState();
+        mutator(base);
+        tx.set(stateRef, base);
+      });
+    }).catch(function (err) {
+      console.error("mutation failed", err);
+      alert("שמירת הנתונים נכשלה, נסו שוב בעוד רגע.");
+    });
+  }
+
+  /* ---------------- boot ---------------- */
+
+  function boot() {
+    render();
+    if (!FIREBASE_CONFIGURED) {
+      STATE = defaultState();
+      CAN_WRITE = false;
+      render();
+      return;
+    }
+
+    Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js")
+    ]).then(function (mods) {
+      var appMod = mods[0];
+      fsApi = mods[1];
+      var authMod = mods[2];
+
+      var app = appMod.initializeApp(firebaseConfig);
+      db = fsApi.getFirestore(app);
+      stateRef = fsApi.doc(db, "beitarPool", "state");
+      var auth = authMod.getAuth(app);
+
+      fsApi.onSnapshot(stateRef, function (snap) {
+        STATE = snap.exists() ? snap.data() : defaultState();
+        render();
+      }, function (err) {
+        console.error("snapshot error", err);
+        CAN_WRITE = false;
+        render();
+      });
+
+      authMod.signInAnonymously(auth).catch(function (err) {
+        console.error("auth failed", err);
+        CAN_WRITE = false;
+        render();
+      });
+
+      fsApi.getDoc(stateRef).then(function (snap) {
+        if (!snap.exists()) {
+          fsApi.setDoc(stateRef, defaultState()).catch(function () {});
+        }
+      });
+    }).catch(function (err) {
+      console.error("firebase init failed", err);
+      CAN_WRITE = false;
+      STATE = STATE || defaultState();
+      render();
+    });
+  }
+
+  boot();
+</script>
+</body>
+</html>
