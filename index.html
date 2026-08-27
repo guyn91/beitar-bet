@@ -253,7 +253,13 @@
   .admin-match-row .meta { font-size: 11px; color: var(--text-dim); font-family: "JetBrains Mono", monospace; }
   .result-form { display: flex; align-items: center; gap: 6px; }
   .result-form input { width: 44px; height: 38px; text-align: center; }
-  .lock-note { font-size: 11.5px; color: var(--text-dim); margin-top: 10px; }
+  .audit-block { flex-basis: 100%; margin-top: 4px; }
+  .audit-block summary { cursor: pointer; font-size: 11.5px; color: var(--gold-deep); font-weight: 600; list-style: none; }
+  .audit-block summary::-webkit-details-marker { display: none; }
+  .audit-item { display: flex; flex-direction: column; gap: 2px; font-size: 12px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+  .audit-item:last-child { border-bottom: none; }
+  .audit-item .who { font-weight: 700; }
+  .audit-item .chain { color: var(--text-dim); font-family: "JetBrains Mono", monospace; font-size: 11px; }
 
   footer.credit { text-align: center; font-size: 11px; color: var(--text-dim); padding: 20px 0 6px; }
 
@@ -283,7 +289,8 @@
   }
 
   let STATE = null;
-  let CAN_WRITE = true;
+  let CAN_WRITE = false;
+  let CONNECTING = true;
   let db = null;
   let stateRef = null;
   let fsApi = null;
@@ -401,8 +408,10 @@
     var notice = "";
     if (!FIREBASE_CONFIGURED) {
       notice = '<div class="banner warn">האתר עדיין לא מחובר ל-Firebase — יש להשלים את ההגדרה בקובץ (firebaseConfig) לפני שאפשר יהיה לשמור הימורים.</div>';
+    } else if (CONNECTING) {
+      notice = '<div class="banner">מתחבר… שליחת הימורים תיפתח בעוד רגע.</div>';
     } else if (!CAN_WRITE) {
-      notice = '<div class="banner warn">לא ניתן לשמור שינויים כרגע (בעיית חיבור). נסו לרענן את הדף.</div>';
+      notice = '<div class="banner warn">לא ניתן לשמור שינויים כרגע (בעיית חיבור). נסו לרענן את הדף, ואם פתחתם את הקישור מתוך אפליקציית הודעות (וואטסאפ/אינסטגרם) נסו לפתוח אותו בדפדפן רגיל.</div>';
     }
     return (
       '<div class="topbar">' +
@@ -547,6 +556,23 @@
     return html;
   }
 
+  function renderAuditLog(match) {
+    var edited = PARTICIPANTS.map(function (name) {
+      var pred = findPrediction(match.id, name);
+      return pred && pred.history && pred.history.length > 1 ? { name: name, history: pred.history } : null;
+    }).filter(Boolean);
+    if (!edited.length) return "";
+    var html = '<details class="audit-block"><summary>יומן שינויים (' + edited.length + ' הימורים נערכו יותר מפעם אחת)</summary>';
+    edited.forEach(function (e) {
+      var chain = e.history.map(function (h) {
+        return h.beitar + "–" + h.opponent + " (" + fmtDateTime(h.ts) + ")";
+      }).join(" ← ");
+      html += '<div class="audit-item"><span class="who">' + esc(e.name) + '</span><span class="chain">' + chain + "</span></div>";
+    });
+    html += "</details>";
+    return html;
+  }
+
   function renderBoardTab() {
     var standings = computeStandings();
     var decided = STATE.matches.filter(function (m) { return m.result; }).length;
@@ -679,6 +705,7 @@
         html += '<button type="submit" class="btn small">שמירת תוצאה</button>';
         html += "</form>";
         html += '<button class="btn danger small" data-delete-match="' + m.id + '">מחיקה</button>';
+        html += renderAuditLog(m);
         html += "</div>";
       });
     }
@@ -694,12 +721,12 @@
         html += '<div class="info"><div class="name">בית״ר ' + (m.venue === "home" ? "נגד" : "אצל") + " " + esc(m.opponent) + " — " + homeVal + "–" + awayVal + "</div>";
         html += '<div class="meta">' + esc(m.competition || "") + " · " + fmtDateTime(m.kickoff) + "</div></div>";
         html += '<button class="btn secondary small" data-reopen-match="' + m.id + '">פתיחה מחדש</button>';
+        html += renderAuditLog(m);
         html += "</div>";
       });
       html += "</div>";
     }
 
-    html += '<p class="lock-note">קוד הניהול הנוכחי: ' + esc(STATE.adminPin) + " — ניתן לבקש מגיא להחליף אותו.</p>";
     return html;
   }
 
@@ -727,7 +754,7 @@
     if (predictForm) {
       predictForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        if (!CAN_WRITE) return;
+        if (!CAN_WRITE) { alert(CONNECTING ? "עוד רגע מתחברים, נסו שוב מיד." : "לא ניתן לשמור כרגע, רעננו את הדף."); return; }
         var who = document.getElementById("who-select").value;
         if (!who) { alert("צריך לבחור שם קודם"); return; }
         var match = nextOpenMatch();
@@ -756,8 +783,13 @@
             existing.beitar = beitarGoals;
             existing.opponent = opponentGoals;
             existing.ts = ts;
+            if (!existing.history) existing.history = [];
+            existing.history.push({ beitar: beitarGoals, opponent: opponentGoals, ts: ts });
           } else {
-            arr.push({ matchId: matchId, participant: who, beitar: beitarGoals, opponent: opponentGoals, ts: ts });
+            arr.push({
+              matchId: matchId, participant: who, beitar: beitarGoals, opponent: opponentGoals, ts: ts,
+              history: [{ beitar: beitarGoals, opponent: opponentGoals, ts: ts }]
+            });
           }
         });
       });
@@ -861,7 +893,11 @@
       });
     }).catch(function (err) {
       console.error("mutation failed", err);
-      alert("שמירת הנתונים נכשלה, נסו שוב בעוד רגע.");
+      var msg = "שמירת הנתונים נכשלה, נסו שוב בעוד רגע.";
+      if (err && err.code === "permission-denied") {
+        msg = "אין הרשאה לשמור כרגע. נסו לרענן את הדף — ואם פתחתם את הקישור מתוך אפליקציית הודעות (וואטסאפ/אינסטגרם) נסו לפתוח אותו בדפדפן רגיל (Chrome/Safari).";
+      }
+      alert(msg);
     });
   }
 
@@ -872,6 +908,7 @@
     if (!FIREBASE_CONFIGURED) {
       STATE = defaultState();
       CAN_WRITE = false;
+      CONNECTING = false;
       render();
       return;
     }
@@ -896,12 +933,18 @@
       }, function (err) {
         console.error("snapshot error", err);
         CAN_WRITE = false;
+        CONNECTING = false;
         render();
       });
 
-      authMod.signInAnonymously(auth).catch(function (err) {
+      authMod.signInAnonymously(auth).then(function () {
+        CAN_WRITE = true;
+        CONNECTING = false;
+        render();
+      }).catch(function (err) {
         console.error("auth failed", err);
         CAN_WRITE = false;
+        CONNECTING = false;
         render();
       });
 
@@ -913,6 +956,7 @@
     }).catch(function (err) {
       console.error("firebase init failed", err);
       CAN_WRITE = false;
+      CONNECTING = false;
       STATE = STATE || defaultState();
       render();
     });
